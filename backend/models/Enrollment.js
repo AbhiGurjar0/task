@@ -10,6 +10,9 @@ const enrollmentModel = new mongoose.Schema({
     ref: "Course",
   },
   enrolledAt: { type: Date, default: Date.now },
+  
 });
+
+enrollmentSchema.index({ userId: 1 });
 
 export default mongoose.model("Enrollment",enrollmentModel)

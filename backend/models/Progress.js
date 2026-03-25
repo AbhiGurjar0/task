@@ -20,4 +20,6 @@ const progressModel = new mongoose.Schema({
   isCompleted: { type: Boolean, default: false },
 });
 
+progressSchema.index({ userId: 1, courseId: 1 }, { unique: true });
+
 export default mongoose.model("Progress", progressModel);

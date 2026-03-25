@@ -16,5 +16,6 @@ const courseModel = new mongoose.Schema(
   },
   { timestamps: true },
 );
+courseSchema.index({ courseName: "text" });
 
-export default mongoose.model("Course",courseModel)
+export default mongoose.model("Course", courseModel);
