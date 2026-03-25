@@ -3,7 +3,6 @@ import Module from "../models/Module.js";
 import Progress from "../models/Progress.js";
 import Enrollment from "../models/Enrollment.js";
 
-
 const getEnrolled = async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -138,7 +137,7 @@ const submitModule = async (req, res) => {
     const { moduleId } = req.params;
     const studentId = req.user.id;
     console.log(studentId);
-    console.log(moduleId)
+    console.log(moduleId);
 
     // checking module is exists or not
     const module = await Module.findById(moduleId);
@@ -148,16 +147,16 @@ const submitModule = async (req, res) => {
         message: "Module not found.",
       });
     }
-    console.log(module)
+    console.log(module);
 
     const courseId = module.courseId;
-    console.log(courseId.toString())
+    console.log(courseId.toString());
     // checking user is enrolled or not
     const enrollment = await Enrollment.findOne({
       userId: studentId,
       courseId: courseId.toString(),
     });
-    console.log(enrollment)
+    console.log(enrollment);
 
     if (!enrollment) {
       return res.status(403).json({
@@ -226,4 +225,41 @@ const submitModule = async (req, res) => {
   }
 };
 
-export { getEnrolled, getCourseProgress, submitModule };
+const getEnrollments = async (req, res) => {
+  try {
+    const enrollments = await Enrollment.find({ userId: req.user._id })
+      .populate("courseId", "courseName createdBy")
+      .sort({ enrolledAt: -1 });
+
+    // attach progress to each enrollment
+    const enrollmentsWithProgress = await Promise.all(
+      enrollments.map(async (enrollment) => {
+        const progress = await Progress.findOne({
+          userId: req.user._id,
+          courseId: enrollment.courseId._id,
+        }).select("percentage isCompleted completedModules");
+
+        return {
+          _id: enrollment._id,
+          course: enrollment.courseId,
+          enrolledAt: enrollment.enrolledAt,
+          progress: {
+            percentage: progress?.percentage || 0,
+            isCompleted: progress?.isCompleted || false,
+            modulesdone: progress?.completedModules?.length || 0,
+          },
+        };
+      }),
+    );
+
+    return res.status(200).json({
+      success: true,
+      total: enrollments.length,
+      enrollments: enrollmentsWithProgress,
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export { getEnrolled, getCourseProgress, submitModule ,getEnrollments};

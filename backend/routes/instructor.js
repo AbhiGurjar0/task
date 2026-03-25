@@ -4,6 +4,10 @@ import { isLoggedIn } from "../middlewares/isLoggedIn.js";
 import {
   createCourse,
   createAndAddModule,
+  deleteModule,
+  editCourse,
+  deleteCourse,
+  editModule,
 } from "../services/instructorServices.js";
 
 const router = express.Router();
@@ -19,6 +23,30 @@ router.post(
   isLoggedIn,
   isAuthorized("create:module"),
   createAndAddModule,
+);
+router.put(
+  "/module/:id",
+  isLoggedIn,
+  isAuthorized("edit:module"),
+  editModule,
+);
+router.put(
+  "/course/:id",
+  isLoggedIn,
+  isAuthorized("edit:course"),
+  editCourse,
+);
+router.delete(
+  "/module/:id",
+  isLoggedIn,
+  isAuthorized("delete:module"),
+  deleteModule,
+);
+router.delete(
+  "/course/:id",
+  isLoggedIn,
+  isAuthorized("delete:course"),
+  deleteCourse,
 );
 
 export default router;

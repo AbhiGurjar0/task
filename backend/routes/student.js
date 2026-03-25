@@ -5,6 +5,7 @@ import {
   getEnrolled,
   getCourseProgress,
   submitModule,
+  getEnrollments
 } from "../services/studentServices.js";
 
 const router = express.Router();
@@ -29,5 +30,12 @@ router.post(
   isAuthorized("submit:module"),
   submitModule,
 );
+router.get("/my-enrollments",
+  isLoggedIn,
+  isAuthorized("view:enrollments"),
+  getEnrollments
+
+);
+
 
 export default router;

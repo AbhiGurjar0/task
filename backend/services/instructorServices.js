@@ -82,5 +82,162 @@ const createAndAddModule = async (req, res) => {
     });
   }
 };
+const editModule = async (req, res) => {
+  try {
+    const module = await Module.findById(req.params.id);
 
-export { createCourse, createAndAddModule };
+    if (!module) {
+      return res.status(404).json({
+        success: false,
+        message: "Module not found.",
+      });
+    }
+
+    // check course ownership — is this their course?
+    const course = await Course.findById(module.courseId);
+    if (course.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only edit modules of your own course.",
+      });
+    }
+
+    const { moduleName, content, orderIndex } = req.body;
+
+    const updated = await Module.findByIdAndUpdate(
+      req.params.id,
+      { moduleName, content, orderIndex },
+      { new: true, runValidators: true },
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Module updated.",
+      module: updated,
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+const editCourse = async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id);
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found.",
+      });
+    }
+
+    // ownership check — only their own course
+    if (course.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only edit your own course.",
+      });
+    }
+
+    const { courseName } = req.body;
+
+    const updated = await Course.findByIdAndUpdate(
+      req.params.id,
+      { courseName },
+      { new: true, runValidators: true },
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Course updated.",
+      course: updated,
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+const deleteModule = async (req, res) => {
+  try {
+    const module = await Module.findById(req.params.id);
+
+    if (!module) {
+      return res.status(404).json({
+        success: false,
+        message: "Module not found.",
+      });
+    }
+
+    // ownership check via course
+    const course = await Course.findById(module.courseId);
+    if (
+      req.user.role === "Instructor" &&
+      course.createdBy.toString() !== req.user._id.toString()
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only delete modules of your own course.",
+      });
+    }
+
+    // remove from course.modules array too
+    await Course.findByIdAndUpdate(
+      module.courseId,
+      { $pull: { modules: module._id } }, // $pull removes from array
+    );
+
+    await Module.findByIdAndDelete(req.params.id);
+
+    return res.status(200).json({
+      success: true,
+      message: `Module "${module.moduleName}" deleted.`,
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+const deleteCourse = async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id);
+
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found.",
+      });
+    }
+
+    // instructor can only delete their own — admin can delete any
+    if (
+      req.user.role === "Instructor" &&
+      course.createdBy.toString() !== req.user._id.toString()
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only delete your own course.",
+      });
+    }
+
+    // clean up everything related
+    await Module.deleteMany({ courseId: course._id });
+    await Enrollment.deleteMany({ courseId: course._id });
+    await Progress.deleteMany({ courseId: course._id });
+    await Course.findByIdAndDelete(req.params.id);
+
+    return res.status(200).json({
+      success: true,
+      message: `Course "${course.courseName}" deleted.`,
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export {
+  createCourse,
+  createAndAddModule,
+  deleteModule,
+  editCourse,
+  deleteCourse,
+  editModule,
+};
