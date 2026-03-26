@@ -9,13 +9,14 @@ const courseModel = new mongoose.Schema(
         ref: "Module",
       },
     ],
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    createdAt: {
-      type: Date,
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
   },
   { timestamps: true },
 );
-courseSchema.index({ courseName: "text" });
+courseModel.index({ courseName: "text" });
 
 export default mongoose.model("Course", courseModel);

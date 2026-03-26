@@ -136,8 +136,7 @@ const submitModule = async (req, res) => {
   try {
     const { moduleId } = req.params;
     const studentId = req.user.id;
-    console.log(studentId);
-    console.log(moduleId);
+  
 
     // checking module is exists or not
     const module = await Module.findById(moduleId);
@@ -147,16 +146,16 @@ const submitModule = async (req, res) => {
         message: "Module not found.",
       });
     }
-    console.log(module);
+   
 
     const courseId = module.courseId;
-    console.log(courseId.toString());
+   
     // checking user is enrolled or not
     const enrollment = await Enrollment.findOne({
       userId: studentId,
       courseId: courseId.toString(),
     });
-    console.log(enrollment);
+  
 
     if (!enrollment) {
       return res.status(403).json({
@@ -227,7 +226,7 @@ const submitModule = async (req, res) => {
 
 const getEnrollments = async (req, res) => {
   try {
-    const enrollments = await Enrollment.find({ userId: req.user._id })
+    const enrollments = await Enrollment.find({ userId: req.user.id })
       .populate("courseId", "courseName createdBy")
       .sort({ enrolledAt: -1 });
 
@@ -235,7 +234,7 @@ const getEnrollments = async (req, res) => {
     const enrollmentsWithProgress = await Promise.all(
       enrollments.map(async (enrollment) => {
         const progress = await Progress.findOne({
-          userId: req.user._id,
+          userId: req.user.id,
           courseId: enrollment.courseId._id,
         }).select("percentage isCompleted completedModules");
 

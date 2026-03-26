@@ -13,6 +13,7 @@ export const PERMISSIONS = {
 
   Student: [
     "enroll:course",
+    "submit:module",
     "view:courses",
     "view:progress",
     "view:enrollments",

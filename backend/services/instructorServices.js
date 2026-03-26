@@ -1,5 +1,7 @@
 import Course from "../models/Course.js";
 import Module from "../models/Module.js";
+import Enrollment from "../models/Enrollment.js";
+import Progress from "../models/Progress.js";
 
 const createCourse = async (req, res) => {
   let { courseName } = req.body;
@@ -32,7 +34,7 @@ const createAndAddModule = async (req, res) => {
     if (!moduleName || !content) {
       return res.status(400).json({
         success: false,
-        message: "moduleName and content are required.",
+        message: "moduleName and content and index are required.",
       });
     }
 
@@ -95,7 +97,7 @@ const editModule = async (req, res) => {
 
     // check course ownership — is this their course?
     const course = await Course.findById(module.courseId);
-    if (course.createdBy.toString() !== req.user._id.toString()) {
+    if (course?.createdBy?.toString() !== req.user.id.toString()) {
       return res.status(403).json({
         success: false,
         message: "You can only edit modules of your own course.",
@@ -131,7 +133,7 @@ const editCourse = async (req, res) => {
     }
 
     // ownership check — only their own course
-    if (course.createdBy.toString() !== req.user._id.toString()) {
+    if (course.createdBy.toString() !== req.user.id.toString()) {
       return res.status(403).json({
         success: false,
         message: "You can only edit your own course.",
@@ -171,7 +173,7 @@ const deleteModule = async (req, res) => {
     const course = await Course.findById(module.courseId);
     if (
       req.user.role === "Instructor" &&
-      course.createdBy.toString() !== req.user._id.toString()
+      course.createdBy.toString() !== req.user.id.toString()
     ) {
       return res.status(403).json({
         success: false,
@@ -210,7 +212,7 @@ const deleteCourse = async (req, res) => {
     // instructor can only delete their own — admin can delete any
     if (
       req.user.role === "Instructor" &&
-      course.createdBy.toString() !== req.user._id.toString()
+      course.createdBy.toString() !== req.user.id.toString()
     ) {
       return res.status(403).json({
         success: false,

@@ -30,7 +30,7 @@ router.post(
   isAuthorized("submit:module"),
   submitModule,
 );
-router.get("/my-enrollments",
+router.get("/my_enrollments",
   isLoggedIn,
   isAuthorized("view:enrollments"),
   getEnrollments
