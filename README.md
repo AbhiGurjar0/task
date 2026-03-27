@@ -93,36 +93,29 @@ npm start
 
 | Method | Endpoint | Description | Access |
 |--------|----------|-------------|--------|
-| POST | `/auth/register` | Register a new user | Public |
-| POST | `/auth/login` | Login and get JWT token | Public |
+| POST | `/register` | Register a new user | Public |
+| POST | `/login` | Login and get JWT token | Public |
 
-### Courses
-
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| POST | `/courses` | Create a new course | Instructor |
-| GET | `/courses` | Get all courses | Public |
-| GET | `/courses/:id` | Get course with modules | Public |
-
-### Modules
+### Instructor
 
 | Method | Endpoint | Description | Access |
 |--------|----------|-------------|--------|
-| POST | `/modules` | Add module to a course | Instructor |
+| POST | `/instructor/create_course` | Create a new course | Instructor |
+| POST | `/instructor/add_module/:course_id` | Add module to a course | Instructor |
+| PUT | `/instructor/module/:id` | Edit Module| Instructor |
+| PUT | `/instructor/course/:id` | Edit COURSE| Instructor |
+| DELETE | `/instructor/module/:id` | DELETE Module| Instructor |
+| DELETE | `/instructor/course/:id` | DELETE Course| Instructor |
 
-### Enrollment
+
+### Student
 
 | Method | Endpoint | Description | Access |
 |--------|----------|-------------|--------|
-| POST | `/enroll` | Enroll in a course | Student |
-| GET | `/my-courses` | Get enrolled courses | Student |
-
-### Progress
-
-| Method | Endpoint | Description | Access |
-|--------|----------|-------------|--------|
-| POST | `/progress/update` | Mark module as completed | Student |
-| GET | `/progress/:courseId` | Get progress for a course | Student |
+| POST | `/student/enroll/:courseId` | Enroll in a course | Student |
+| POST | `/student/submit_module/:moduleId` | Submit a Module| Student |
+| GET | `/student/progress/:courseId` | Get progress for a course | Student |
+| GET | `/student/my_enrollments` | Get enrolled courses | Student |
 
 ### Admin
 
@@ -156,7 +149,7 @@ All protected routes require the JWT token in the request header:
 Authorization: Bearer <token>
 ```
 
-Middleware `verifyToken` validates the token and `authorizeRole` checks if the user's role is allowed for that route.
+Middleware `isLoggedIn` validates the token and `isAuthorized` checks if the user's role is allowed for that route.
 
 ---
 
